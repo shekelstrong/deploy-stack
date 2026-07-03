@@ -13,39 +13,34 @@ async def run(name: str, vps_host: str, vps_user: str = "root", vps_path: str = 
     Returns:
         Словарь с bash-скриптом.
     """
-    vps_path = vps_path or f"/root/Projects/{name}"
+    path = vps_path or f"/root/Projects/{name}"
 
-    bash_script = f'''#!/bin/bash
-# SSH-деплой для {name}
-# Использование: bash deploy.sh
-
-set -e
-
-VPS_HOST="{vps_host}"
-VPS_USER="{vps_user}"
-VPS_PATH="{vps_path}"
-SSH_KEY="${{SSH_KEY:-$HOME/.ssh/id_rsa}"
-
-echo "==> Deploying {name} to $VPS_HOST:$VPS_PATH"
-
-ssh -i "$SSH_KEY" "$VPS_USER@$VPS_HOST" << EOF
-    set -e
-    cd "$VPS_PATH"
-    echo "==> Pulling latest code"
-    git pull origin main
-    echo "==> Rebuilding and restarting"
-    docker compose up -d --build
-    echo "==> Tailing logs"
-    docker compose logs --tail=10
-EOF
-
-echo "==> Deploy complete: {name}"
-'''
-
+    script = (
+        "#!/bin/bash\n"
+        "# SSH-деплой для " + name + "\n"
+        "# Использование: bash deploy.sh\n\n"
+        "set -e\n\n"
+        "VPS_HOST=\"" + vps_host + "\"\n"
+        "VPS_USER=\"" + vps_user + "\"\n"
+        "VPS_PATH=\"" + path + "\"\n"
+        'SSH_KEY="${SSH_KEY:-$HOME/.ssh/id_rsa}"\n\n'
+        'echo "==> Deploying ' + name + ' to $VPS_HOST:$VPS_PATH"\n\n'
+        'ssh -i "$SSH_KEY" "$VPS_USER@$VPS_HOST" << EOF\n'
+        "    set -e\n"
+        '    cd "$VPS_PATH"\n'
+        '    echo "==> Pulling latest code"\n'
+        "    git pull origin main\n"
+        '    echo "==> Rebuilding and restarting"\n'
+        "    docker compose up -d --build\n"
+        '    echo "==> Tailing logs"\n'
+        "    docker compose logs --tail=10\n"
+        "EOF\n\n"
+        'echo "==> Deploy complete: ' + name + '"\n'
+    )
 
     return {
         "script_name": "deploy.sh",
-        "script_content": bash_script,
+        "script_content": script,
         "instructions": [
             "1. Сохрани как deploy.sh в корне проекта",
             "2. chmod +x deploy.sh",
