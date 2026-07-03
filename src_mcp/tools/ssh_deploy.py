@@ -42,6 +42,7 @@ EOF
 echo "==> Deploy complete: {name}"
 '''
 
+
     return {
         "script_name": "deploy.sh",
         "script_content": bash_script,
